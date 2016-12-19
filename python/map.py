@@ -30,7 +30,7 @@ class map:
             raise KeyError
         p = cmap_lib.LSQ_DereferenceIterator(it)
         cmap_lib.LSQ_DestroyIterator(it)
-        return int(cast(p, POINTER(c_int)).contents.value)
+        return cast(p, POINTER(c_int)).contents.value
 
     def __delitem__(self, key):
         cmap_lib.LSQ_DeleteElement(self.cmap, c_int(key))
@@ -68,7 +68,7 @@ class map:
         while not cmap_lib.LSQ_IsIteratorPastRear(it):
             p = cmap_lib.LSQ_DereferenceIterator(it)
             k = cmap_lib.LSQ_GetIteratorKey(it)
-            items.append((int(k), int(cast(p, POINTER(c_int)).contents.value)))
+            items.append((int(k), cast(p, POINTER(c_int)).contents.value))
             cmap_lib.LSQ_AdvanceOneElement(it)
         cmap_lib.LSQ_DestroyIterator(it)
         return items
@@ -98,7 +98,7 @@ class map:
         if cmap_lib.LSQ_IsIteratorPastRear(it):
             cmap_lib.LSQ_DestroyIterator(it)
             return default
-        v = int(cast(cmap_lib.LSQ_DereferenceIterator(it), POINTER(c_int)).contents.value)
+        v = cast(cmap_lib.LSQ_DereferenceIterator(it), POINTER(c_int)).contents.value
         cmap_lib.LSQ_DestroyIterator(it)
         cmap_lib.LSQ_DeleteElement(self.cmap, c_int(key))
         return v
