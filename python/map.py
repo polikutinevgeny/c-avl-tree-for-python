@@ -15,7 +15,13 @@ class map:
         return cmap_lib.LSQ_GetSize(self.cmap)
 
     def __setitem__(self, key, item):
-        cmap_lib.LSQ_InsertElement(self.cmap, c_int(key), c_int(item))
+        it = cmap_lib.LSQ_GetElementByIndex(self.cmap, c_int(key))
+        if cmap_lib.LSQ_IsIteratorPastRear(it):
+            cmap_lib.LSQ_InsertElement(self.cmap, c_int(key), c_int(item))
+        else:
+            p = cast(cmap_lib.LSQ_DereferenceIterator(it), POINTER(c_int))
+            p.contents.value = item
+        cmap_lib.LSQ_DestroyIterator(it)
 
     def __getitem__(self, item):
         it = cmap_lib.LSQ_GetElementByIndex(self.cmap, c_int(item))

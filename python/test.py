@@ -18,6 +18,21 @@ class CMapTests(unittest.TestCase):
         self.assertEqual(m[4], 16)
         self.assertEqual(m[5], 17)
 
+    def test_change(self):
+        m = map()
+        m[1] = 12
+        m[5] = 17
+        m[2] = 13
+        m[4] = 16
+        m[1] = 1
+        m[2] = 2
+        m[4] = 4
+        m[5] = 5
+        self.assertEqual(m[1], 1)
+        self.assertEqual(m[2], 2)
+        self.assertEqual(m[4], 4)
+        self.assertEqual(m[5], 5)
+
     def test_len(self):
         m = map()
         m[1] = 12
