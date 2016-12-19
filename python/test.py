@@ -144,6 +144,10 @@ class CMapTests(unittest.TestCase):
             a.append(i)
         self.assertEqual(a, [1, 2, 4, 5])
 
+    def test_key_error(self):
+        m = map()
+        self.assertRaises(KeyError, lambda : m[10])
+
 
 if __name__ == '__main__':
     unittest.main()
