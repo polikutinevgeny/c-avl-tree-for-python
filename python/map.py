@@ -40,7 +40,14 @@ class map:
         self.cmap = cmap_lib.LSQ_CreateSequence()
 
     def copy(self):
-        pass
+        new = map()
+        it = cmap_lib.LSQ_GetFrontElement(self.cmap)
+        while not cmap_lib.LSQ_IsIteratorPastRear(it):
+            p = cmap_lib.LSQ_DereferenceIterator(it)
+            k = cmap_lib.LSQ_GetIteratorKey(it)
+            new[k] = cast(p, POINTER(c_int)).contents
+        cmap_lib.LSQ_DestroyIterator(it)
+        return new
 
     def get(self, key, default=None):
         try:
@@ -49,10 +56,29 @@ class map:
             return default
 
     def items(self):
-        pass
+        items = []
+        it = cmap_lib.LSQ_GetFrontElement(self.cmap)
+        while not cmap_lib.LSQ_IsIteratorPastRear(it):
+            p = cmap_lib.LSQ_DereferenceIterator(it)
+            k = cmap_lib.LSQ_GetIteratorKey(it)
+            items.append((int(k), int(cast(p, POINTER(c_int)).contents)))
+        cmap_lib.LSQ_DestroyIterator(it)
 
     def keys(self):
-        pass
+        keys = []
+        it = cmap_lib.LSQ_GetFrontElement(self.cmap)
+        while not cmap_lib.LSQ_IsIteratorPastRear(it):
+            k = cmap_lib.LSQ_GetIteratorKey(it)
+            keys.append(int(k))
+        cmap_lib.LSQ_DestroyIterator(it)
+
+    def values(self):
+        values = []
+        it = cmap_lib.LSQ_GetFrontElement(self.cmap)
+        while not cmap_lib.LSQ_IsIteratorPastRear(it):
+            p = cmap_lib.LSQ_DereferenceIterator(it)
+            values.append(int(cast(p, POINTER(c_int)).contents))
+        cmap_lib.LSQ_DestroyIterator(it)
 
     def pop(self, key, default=None):
         it = cmap_lib.LSQ_GetElementByIndex(self.cmap, c_int(key))
@@ -63,3 +89,9 @@ class map:
         cmap_lib.LSQ_DestroyIterator(it)
         cmap_lib.LSQ_DeleteElement(self.cmap, c_int(key))
         return v
+
+    def __iter__(self):
+        it = cmap_lib.LSQ_GetFrontElement(self.cmap)
+        while not cmap_lib.LSQ_IsIteratorPastRear(it):
+            yield int(cmap_lib.LSQ_GetIteratorKey(it))
+        cmap_lib.LSQ_DestroyIterator(it)
