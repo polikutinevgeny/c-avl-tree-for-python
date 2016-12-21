@@ -6,8 +6,10 @@ cmap_lib = CDLL("libc_avl_tree_for_python")
 
 class Map:
 
-    def __init__(self):
+    def __init__(self, *args):
         self.cmap = cmap_lib.LSQ_CreateSequence()
+        if len(args) == 1 and isinstance(args[0], Map):
+            self.update(args[0])
 
     def __del__(self):
         cmap_lib.LSQ_DestroySequence(self.cmap)
@@ -79,6 +81,17 @@ class Map:
         cmap_lib.LSQ_DeleteElement(self.cmap, c_int(key))
         return v
 
+    def popitem(self):
+        it = _MapIterator(cmap_lib.LSQ_GetFrontElement(self.cmap))
+        v = it.pair()
+        cmap_lib.LSQ_DeleteFrontElement(self.cmap)
+        return v
+
+    def update(self, other):
+        self.clear()
+        for (k, v) in other.items():
+            self[k] = v
+
     def __iter__(self):
         it = _MapIterator(cmap_lib.LSQ_GetFrontElement(self.cmap))
         while not it.is_past_rear():
@@ -120,6 +133,16 @@ class CMapTests(unittest.TestCase):
     def test_construction(self):
         m = Map()
         self.assertTrue(m.cmap)
+
+    def test_construction_copy(self):
+        m = Map()
+        m[1] = 12
+        m[5] = 17
+        m[2] = 13
+        m[4] = 16
+        m2 = Map(m)
+        self.assertEqual(list(m2.items()), [(1, 12), (2, 13), (4, 16), (5, 17)])
+
 
     def test_set_and_get(self):
         m = Map()
@@ -261,6 +284,27 @@ class CMapTests(unittest.TestCase):
     def test_key_error(self):
         m = Map()
         self.assertRaises(KeyError, lambda: m[10])
+
+    def test_popitem(self):
+        m = Map()
+        m[1] = 12
+        m[5] = 17
+        m[2] = 13
+        m[4] = 16
+        m.popitem()
+        self.assertEqual(len(m), 3)
+
+    def test_update(self):
+        m = Map()
+        m[1] = 12
+        m[5] = 17
+        m[2] = 13
+        m[4] = 16
+        m2 = Map()
+        m2[1] = 3
+        m2[2] = 8
+        m2.update(m)
+        self.assertEqual(list(m2.values()), [12, 13, 16, 17])
 
 
 class IteratorTests(unittest.TestCase):
